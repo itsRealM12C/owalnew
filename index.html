@@ -609,7 +609,18 @@
       /* Added keyframes for continuous hue rotation */
         @keyframes hueRotation {
             0% { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(360deg); }
+            100% { filter: hue-rotate(360deg); 
+                  
+           /* New rainbow animation styles */
+        @keyframes rainbowHue {
+            from { filter: hue-rotate(0deg); }
+            to { filter: hue-rotate(360deg); }
+        }
+
+        /* New rainbow mode class */
+        .rainbow-mode {
+            animation: rainbowHue 5s linear infinite;
+        }
     </style>
   </div>
 </body>
