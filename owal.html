@@ -77,8 +77,7 @@
       height: 100vh;
       display: flex;
       align-items: flex-start; /* Align to top to move UI higher */
-      padding-top: 18vh; /* Push down slightly from the very top */
-      justify-content: center;
+      padding-top: 15vh; /* Push down slightly from the very top */
       overflow: hidden;
     }
 
@@ -87,7 +86,7 @@
       flex-direction: row;
       align-items: center;
       gap: 2.5em; /* Scaled gap between items */
-      padding: 0 50vw; /* Ensures first and last items can reach the center */
+      /* No padding here anymore, JS handles centering perfectly */
       transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1); /* Smooth scrolling */
       will-change: transform;
     }
@@ -584,7 +583,8 @@
       items = document.querySelectorAll('.app-item');
       if (items.length > 0) {
         items[currentIndex].classList.add('selected');
-        centerApp();
+        // Wait for DOM to update layout before centering
+        requestAnimationFrame(centerApp);
       }
     }
 
@@ -676,13 +676,13 @@
       if (e.key === 'ArrowUp' || e.keyCode === 38) {
         currentScaleFactor = Math.min(maxScaleFactor, currentScaleFactor + scaleStep);
         document.body.style.fontSize = (baseBodyFontSizePx * currentScaleFactor) + 'px';
-        centerApp(); // Re-center on scale change
+        requestAnimationFrame(centerApp); // Re-center on scale change after layout updates
         e.preventDefault();
         return;
       } else if (e.key === 'ArrowDown' || e.keyCode === 40) {
         currentScaleFactor = Math.max(minScaleFactor, currentScaleFactor - scaleStep);
         document.body.style.fontSize = (baseBodyFontSizePx * currentScaleFactor) + 'px';
-        centerApp(); // Re-center on scale change
+        requestAnimationFrame(centerApp); // Re-center on scale change after layout updates
         e.preventDefault();
         return;
       }
@@ -691,13 +691,13 @@
       if (e.key === 'PageUp' || e.keyCode === 33) {
         currentScaleFactor = Math.min(maxScaleFactor, currentScaleFactor + scaleStep);
         document.body.style.fontSize = (baseBodyFontSizePx * currentScaleFactor) + 'px';
-        centerApp();
+        requestAnimationFrame(centerApp);
         e.preventDefault();
         return;
       } else if (e.key === 'PageDown' || e.keyCode === 34) {
         currentScaleFactor = Math.max(minScaleFactor, currentScaleFactor - scaleStep);
         document.body.style.fontSize = (baseBodyFontSizePx * currentScaleFactor) + 'px';
-        centerApp();
+        requestAnimationFrame(centerApp);
         e.preventDefault();
         return;
       }
@@ -709,7 +709,11 @@
         if (currentTime - lastLeftArrowPressTime < doublePressThreshold) {
           if (rainbowModeToggleCoolDown === null) {
             isRainbowModeActive = !isRainbowModeActive;
-            document.body.classList.toggle('rainbow-mode', isRainbowModeActive);
+            if (isRainbowModeActive) {
+              document.body.classList.add('rainbow-mode');
+            } else {
+              document.body.classList.remove('rainbow-mode');
+            }
             rainbowModeToggleCoolDown = setTimeout(function() { rainbowModeToggleCoolDown = null; }, doublePressThreshold * 1.5);
           }
         }
@@ -759,8 +763,11 @@
     // --- Clock Update ---
     function updateClock() {
       var now = new Date();
-      var h = String(now.getHours()).padStart(2, '0');
-      var m = String(now.getMinutes()).padStart(2, '0');
+      var h = String(now.getHours());
+      var m = String(now.getMinutes());
+      // Manual padding for older browser compatibility
+      if (h.length < 2) h = '0' + h;
+      if (m.length < 2) m = '0' + m;
       document.getElementById('clock').textContent = h + ':' + m;
     }
 
