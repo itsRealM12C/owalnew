@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Online webOS App Launcher</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="manifest" href="site.webmanifest">
+  <style>
+    /* PS5 Themed UI Variables */
+    :root {
+      --bg-color: #000000;
+      --text-color: #ffffff;
+      --text-muted: #aaaaaa;
+      --accent: #0070cc; /* Overridden by JS randomizer */
+      --accent-dim: rgba(0, 112, 204, 0.2);
+      --accent-glow: rgba(0, 112, 204, 0.7);
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* Prevent default scrollbars */
+      transition: font-size 0.2s ease;
+      user-select: none;
+    }
+
+    /* Three.js Canvas Background */
+    canvas {
+      position: fixed !important;
+      top: 0;
+      left: 0;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* PS5 Style Header */
+    .ps-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 40px 60px 20px;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      z-index: 10;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
+    }
+
+    .ps-header h1 {
+      margin: 0;
+      font-size: 2.5em;
+      font-weight: 300;
+      letter-spacing: 1px;
+      text-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .ps-header .clock {
+      font-size: 1.5em;
+      font-weight: 300;
+      color: var(--text-muted);
+    }
+
+    /* PS5 Horizontal Carousel Layout */
+    .app-viewport {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .app-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 35px;
+      padding: 0 50vw; /* Ensures first and last items can reach the center */
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth scrolling */
+      will-change: transform;
+    }
+
+    .app-item {
+      flex-shrink: 0;
+      width: 200px;
+      height: 200px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      outline: none;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .app-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 25%; /* PS5 Squircle shape */
+      background: #1a1a1a;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .app-item p {
+      position: absolute;
+      bottom: -50px;
+      width: 250px;
+      text-align: center;
+      font-size: 1.2em;
+      font-weight: 500;
+      color: var(--text-color);
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      text-shadow: 0 0 10px var(--accent-glow);
+      pointer-events: none;
+    }
+
+    /* PS5 Focus / Selected State */
+    .app-item.selected {
+      transform: scale(1.15);
+      z-index: 10;
+    }
+
+    .app-item.selected img {
+      border-color: rgba(255,255,255,0.9);
+      box-shadow: 0 0 40px var(--accent-glow), 0 15px 40px rgba(0,0,0,0.9);
+    }
+
+    .app-item.selected p {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Edge Fade Mask */
+    .app-viewport::before, .app-viewport::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 15vw;
+      z-index: 5;
+      pointer-events: none;
+    }
+    .app-viewport::before {
+      left: 0;
+      background: linear-gradient(to right, #000 0%, transparent 100%);
+    }
+    .app-viewport::after {
+      right: 0;
+      background: linear-gradient(to left, #000 0%, transparent 100%);
+    }
+
+    /* Animation for launching app */
+    .app-item img.animate-to-fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: none !important;
+      border-radius: 0;
+      z-index: 9999;
+      object-fit: cover; 
+      transition: all 3s ease-in-out;
+      border: none;
+      box-shadow: none;
+      transform: scale(1); /* Override selected scale during launch */
+    }
+
+    body.app-transitioning .app-item img:not(.animate-to-fullscreen),
+    body.app-transitioning .ps-header,
+    body.app-transitioning #footer-controls,
+    body.app-transitioning .app-viewport::before,
+    body.app-transitioning .app-viewport::after {
+      opacity: 0;
+      transition: opacity 0.2s ease-out;
+      pointer-events: none;
+    }
+
+    body.app-transitioning {
+      overflow: hidden;
+    }
+
+    /* Footer Controls */
+    #footer-controls {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 20px 60px;
+      background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+      font-size: 0.8em;
+      color: var(--text-muted);
+      box-sizing: border-box;
+      z-index: 10;
+    }
+
+    #footer-controls b {
+      color: var(--accent);
+      font-weight: bold;
+      margin-right: 5px;
+    }
+
+    /* Rainbow mode overrides */
+    @keyframes rainbowHue {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
+
+    body.rainbow-mode canvas,
+    body.rainbow-mode .ps-header h1,
+    body.rainbow-mode .app-item.selected img,
+    body.rainbow-mode .app-item.selected p {
+      animation: rainbowHue 5s linear infinite;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ps-header">
+    <h1>TV Launcher</h1>
+    <div class="clock" id="clock"></div>
+  </div>
+
+  <div class="app-viewport">
+    <div id="app-list" class="app-row"></div>
+  </div>
+
+  <div id="footer-controls">
+    <b>0-9</b> Quick Launch &nbsp; | &nbsp; 
+    <b>LEFT/RIGHT</b> Navigate &nbsp; | &nbsp; 
+    <b>UP/DOWN</b> Scale UI &nbsp; | &nbsp; 
+    <b>ENTER</b> Select &nbsp; | &nbsp; 
+    <b>RED</b> YouTube &nbsp; | &nbsp;
+    <b>GREEN</b> TV Games &nbsp; | &nbsp;
+    <b>YELLOW</b> PlayWorks &nbsp; | &nbsp;
+    <b>BLUE</b> Reload
+  </div>
+
+  <script>
+    // --- Per-pageload randomized cyan/blue accent color ---------------------
+    window.__accentHue = 170 + Math.random() * 80;
+
+    function hslToRgb(h, s, l) {
+        h /= 360;
+        const a = s * Math.min(l, 1 - l);
+        const f = (n) => {
+            const k = (n + h * 12) % 12;
+            return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+        };
+        return [f(0), f(8), f(4)];
+    }
+
+    (function applyAccent() {
+        const hue = window.__accentHue;
+        const accent = hslToRgb(hue, 1.0, 0.55);
+        const toCss = (rgb, a) => `rgba(${Math.round(rgb[0]*255)}, ${Math.round(rgb[1]*255)}, ${Math.round(rgb[2]*255)}, ${a})`;
+        document.documentElement.style.setProperty('--accent', toCss(accent, 1));
+        document.documentElement.style.setProperty('--accent-dim', toCss(accent, 0.18));
+        document.documentElement.style.setProperty('--accent-glow', toCss(accent, 0.9));
+    })();
+  </script>
+
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+
+    const vsCode = `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `;
+
+    const snoiseCode = `
+      vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+      vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+      vec4 permute(vec4 x) { return mod289(((x*34.0)+10.0)*x); }
+      vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+      float snoise(vec3 v) {
+        const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+        const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+        vec3 i  = floor(v + dot(v, C.yyy));
+        vec3 x0 = v - i + dot(i, C.xxx);
+        vec3 g = step(x0.yzx, x0.xyz);
+        vec3 l = 1.0 - g;
+        vec3 i1 = min(g.xyz, l.zxy);
+        vec3 i2 = max(g.xyz, l.zxy);
+        vec3 x1 = x0 - i1 + C.xxx;
+        vec3 x2 = x0 - i2 + C.yyy;
+        vec3 x3 = x0 - D.yyy;
+        i = mod289(i);
+        vec4 p = permute(permute(permute(i.z + vec4(0.0, i1.z, i2.z, 1.0)) + i.y + vec4(0.0, i1.y, i2.y, 1.0)) + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+        float n_ = 0.142857142857;
+        vec3 ns = n_ * D.wyz - D.xzx;
+        vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+        vec4 x_ = floor(j * ns.z);
+        vec4 y_ = floor(j - 7.0 * x_);
+        vec4 x = x_ * ns.x + ns.yyyy;
+        vec4 y = y_ * ns.x + ns.yyyy;
+        vec4 h = 1.0 - abs(x) - abs(y);
+        vec4 b0 = vec4(x.xy, y.xy);
+        vec4 b1 = vec4(x.zw, y.zw);
+        vec4 s0 = floor(b0)*2.0 + 1.0;
+        vec4 s1 = floor(b1)*2.0 + 1.0;
+        vec4 sh = -step(h, vec4(0.0));
+        vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+        vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+        vec3 p0 = vec3(a0.xy, h.x);
+        vec3 p1 = vec3(a0.zw, h.y);
+        vec3 p2 = vec3(a1.xy, h.z);
+        vec3 p3 = vec3(a1.zw, h.w);
+        vec4 norm = taylorInvSqrt(vec4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
+        p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+        vec4 m = max(0.5 - vec4(dot(x0, x0), dot(x1, x1), dot(x2, x2), dot(x3, x3)), 0.0);
+        m = m * m;
+        return 105.0 * dot(m*m, vec4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
+      }
+    `;
+
+    const fsCode = `
+      uniform float time;
+      uniform vec2 resolution;
+      uniform vec3 colorA;
+      uniform vec3 colorB;
+      uniform float colorMode;
+      varying vec2 vUv;
+
+      void main() {
+        vec2 st = vUv - vec2(0.5);
+        st.x *= (resolution.x / resolution.y);
+
+        float angle = time * 0.045;
+        float c = cos(angle);
+        float s = sin(angle);
+        mat2 rot = mat2(c, -s, s, c);
+        vec2 rotSt = rot * st;
+
+        vec2 drift = vec2(time * 0.025, time * 0.018);
+        float noiseValue = snoise(vec3(rotSt * 3.2 + drift, time * 0.08));
+
+        float bands = 15.0; 
+        float lowerBound = floor(noiseValue * bands) / bands;
+        float deltaDiff = noiseValue - lowerBound;
+
+        float lineThickness = 0.015; 
+        if (deltaDiff > lineThickness) {
+            discard; 
+        }
+
+        float linearT = 0.5 + 0.5 * sin(rotSt.x * 1.6 + rotSt.y * 1.1 + time * 0.12);
+        float radialT = clamp(length(rotSt) * 0.9 + sin(time * 0.1) * 0.15, 0.0, 1.0);
+        float mixT = mix(linearT, radialT, colorMode);
+
+        vec3 lineRGB = mix(colorA, colorB, mixT);
+        float edgeAlpha = smoothstep(lineThickness, 0.0, deltaDiff); 
+
+        gl_FragColor = vec4(lineRGB, edgeAlpha);
+      }
+    `;
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(0, width, 0, height, 1, 3);
+    camera.position.z = 2;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(width, height);
+    document.body.insertBefore(renderer.domElement, document.body.firstChild);
+
+    let geometry = new THREE.PlaneGeometry(width, height);
+    geometry.translate(width / 2, height / 2, 0); 
+
+    function hslToRgbVec(h, s, l) {
+        h /= 360;
+        const a = s * Math.min(l, 1 - l);
+        const f = (n) => {
+            const k = (n + h * 12) % 12;
+            return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+        };
+        return new THREE.Vector3(f(0), f(8), f(4));
+    }
+
+    const baseHue = window.__accentHue !== undefined ? window.__accentHue : (170 + Math.random() * 80);
+    const colorA = hslToRgbVec(baseHue, 0.9, 0.35);
+    const colorB = hslToRgbVec((baseHue + 25) % 360, 0.95, 0.62);
+    const colorMode = Math.random() < 0.5 ? 0.0 : 1.0;
+
+    const uniforms = {
+      time: { value: 0.0 },
+      resolution: { value: new THREE.Vector2(width, height) },
+      colorA: { value: colorA },
+      colorB: { value: colorB },
+      colorMode: { value: colorMode }
+    };
+
+    const material = new THREE.ShaderMaterial({
+      uniforms: uniforms,
+      vertexShader: vsCode,
+      fragmentShader: snoiseCode + fsCode,
+      transparent: true,
+      side: THREE.DoubleSide
+    });
+
+    let mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      uniforms.time.value = clock.getElapsedTime();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        
+        renderer.setSize(width, height);
+        uniforms.resolution.value.set(width, height);
+        
+        camera.right = width;
+        camera.bottom = height;
+        camera.updateProjectionMatrix();
+        
+        scene.remove(mesh);
+        geometry.dispose();
+        geometry = new THREE.PlaneGeometry(width, height);
+        geometry.translate(width / 2, height / 2, 0);
+        mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+    });
+  </script>
+
+  <script>
+    // --- App Data & Rendering Logic (JSON -> XML -> Embedded Fallback) ---
+    async function fetchApps() {
+      // 1. Attempt to fetch 'apps.json'
+      try {
+        const response = await fetch('apps.json');
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            console.log('Successfully loaded apps.json');
+            return data;
+          }
+        }
+        throw new Error('apps.json not found or empty');
+      } catch (jsonError) {
+        console.warn('apps.json fetch failed, trying apps.xml...', jsonError.message);
+        
+        // 2. Attempt to fetch 'apps.xml' if JSON fails
+        try {
+          const response = await fetch('apps.xml');
+          if (response.ok) {
+            const text = await response.text();
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(text, "text/xml");
+            const xmlApps = xmlDoc.querySelectorAll("app");
+            
+            if (xmlApps.length > 0) {
+              console.log('Successfully loaded apps.xml');
+              let appsArray = [];
+              xmlApps.forEach(app => {
+                appsArray.push({
+                  name: app.querySelector("name")?.textContent || "Unknown",
+                  icon: app.querySelector("icon")?.textContent || "",
+                  url: app.querySelector("url")?.textContent || "#",
+                  background: app.querySelector("background")?.textContent || "#000000"
+                });
+              });
+              return appsArray;
+            }
+          }
+          throw new Error('apps.xml not found or empty');
+        } catch (xmlError) {
+          console.warn('apps.xml fetch failed, using embedded fallback data.', xmlError.message);
+          
+          // 3. Fallback embedded JSON structure
+          return [
+            { "name": "YouTube", "icon": "youtube.leanback.png", "url": "https://www.youtube.com/tv?env_forceFullAnimation=1&env_enableVoice=1&env_enableWebSpeech=0", "background": "#FF0000" },
+            { "name": "YouTube Kids", "icon": "ytkids.png", "url": "https://www.youtube.com/tv/kids", "background": "#FF0000" },
+            { "name": "Twitch", "icon": "twitch.png", "url": "https://webos.tv.twitch.tv/", "background": "#9146FF" },
+            { "name": "TikTok TV", "icon": "tiktok.png", "url": "https://tv.tiktok.com/webos", "background": "#000000" },
+            { "name": "Free Games by PlayWorks", "icon": "playworks.gif", "url": "https://service.play.works/service/apps/portal_vizio/index.html", "background": "#00E5FF" },
+            { "name": "AccuWeather", "icon": "accuweather.gif", "url": "https://lgsmarttvapp.accuweather.com/widget/lgsmarttvapp/webcontent/webos/index.html", "background": "#FF6600" },
+            { "name": "myTuner Radio", "icon": "radio.png", "url": "https://devices.mytuner.mobi/", "background": "#FF5500" },
+            { "name": "TV Games", "icon": "tvgames.png", "url": "https://apps.tvgam.es/tv_games/vizio_portal/production/portal/index.html?env_forceFullAnimation=1", "background": "#00FF00" },
+            { "name": "Couchplay Games", "icon": "spielecenter.tv.itsmy.png", "url": "https://lgapp.itsmy.tv/spielecenter", "background": "#1DB954" },
+            { "name": "Spotify", "icon": "spotify-beehive.png", "url": "https://api-partner.spotify.com/tvapp?platform=webos", "background": "#1DB954" },
+            { "name": "Direct One", "icon": "direct.png", "url": "https://upchustatic.solocoo.tv/webos/12.4.0/main.html", "background": "#E50914" },
+            { "name": "Megogo Games", "icon": "mgames.png", "url": "https://app.megogo.games", "background": "#FFCC00" },
+            { "name": "SWEET.TV", "icon": "sweet.png", "url": "https://tv.sweet.tv", "background": "#FF69B4" },
+            { "name": "MEGOGO", "icon": "megogo.png", "url": "https://lg-app.megogo.net/?lang=EN", "background": "#FFCC00" },
+            { "name": "Awale", "icon": "awale.png", "url": "https://smartgames.tv/vprod/Awale/", "background": "#8B4513" },
+            { "name": "Stremio", "icon": "stremio.gif", "url": "https://tv.strem.io/", "background": "#8A2BE2" },
+            { "name": "Max", "icon": "max.gif", "url": "https://webos.play.max.com", "background": "#0000FF" },
+            { "name": "Web Video Caster", "icon": "webvideocaster.gif", "url": "http://vewd.webvideocaster.com/", "background": "#FF5722" },
+            { "name": "!Free! Games Hub", "icon": "freegameshub.gif", "url": "https://cdn.klebo.io/hub/webos/1.2.0", "background": "#00FF00" },
+            { "name": "SS-IPTV", "icon": "ss.png", "url": "https://app.ss-iptv.com/?group=LG&version=r_beta", "background": "#00FFFF" },
+            { "name": "Media Station X", "icon": "msx.png", "url": "https://msx.benzac.de/lg.html?exit=1", "background": "#FFFFFF" },
+            { "name": "Plex", "icon": "plex.png", "url": "https://app.plex.tv/tv-v5-generic?platform=foxxum", "background": "#E5A00D" },
+            { "name": "SmartOne IPTV", "icon": "smartoneiptv.gif", "url": "https://netcast.smartone-iptv.com/", "background": "#FF0000" },
+            { "name": "Wikipedia", "icon": "wikipedia.png", "url": "http://4181361297.am-live.fxmconnect.com/#app", "background": "#000000" },
+            { "name": "3D Pinball", "icon": "https://repo.webosbrew.org/apps/icons/com.github.k4zmu2a.space-cadet-pinball.png", "url": "https://emupedia.net/emupedia-game-space-cadet-pinball/", "background": "#0000FF" },
+            { "name": "Chocolate Doom Demo", "icon": "https://repo.webosbrew.org/apps/icons/org.chocolate-doom.demo.png", "url": "https://mattiasgustavsson.com/wasm/doom-crt/", "background": "#8B0000" },
+            { "name": "Lampa", "icon": "lampa.png", "url": "http://lampa.mx/", "background": "#FF4500" },
+            { "name": "ForkNewBeta", "icon": "forknewbeta.png", "url": "http://browser.appinfo.su/", "background": "#2F4F4F" },
+            { "name": "Ott-Play", "icon": "Ottplay.png", "url": "http://ott-play.com/f/", "background": "#1E90FF" },
+            { "name": "Ott-Play FOSS", "icon": "ottplayfoss.png", "url": "http://ottp.eu.org/f/", "background": "#1E90FF" },
+            { "name": "DStore 1", "icon": "dstore.png", "url": "http://z91926l2.beget.tech/tv/index.php", "background": "#FF8C00" },
+            { "name": "DStore 2", "icon": "dstore.png", "url": "http://x920083t.beget.tech/tv/indexv.php", "background": "#FF8C00" },
+            { "name": "DStore VIP", "icon": "dstore.png", "url": "http://salita.pluton-host.ru/tv/vip.php", "background": "#FFD700" },
+            { "name": "LG Channels", "icon": "lgc.png", "url": "https://lgchp-app.megogo.net/#init", "background": "#A52A2A" }
+          ];
+        }
+      }
+    }
+
+    let apps = [];
+    let items = [];
+    let currentIndex = 0;
+
+    function renderApps(data) {
+      const container = document.getElementById('app-list');
+      container.innerHTML = '';
+      
+      data.forEach(app => {
+        const div = document.createElement('div');
+        div.className = 'app-item';
+        div.setAttribute('data-url', app.url);
+        div.setAttribute('data-name', app.name);
+        
+        // Using onerror to fallback if icon is missing
+        div.innerHTML = `
+          <img src="${app.icon}" alt="${app.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNjAiIGhlaWdodD0iMTYwIiB2aWV3Qm94PSIwIDAgMTYwIDE2MCI+CiAgPHJlY3Qgd2lkdGg9IjE2MCIgaGVpZ2h0PSIxNjAiIGZpbGw9IiMzMzMiLz4KICA8dGV4dCB4PSI4MCIgeT0iODAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyMCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgYWxpZ25tZW50PSJtaWRkbGUiPkFwcDwvdGV4dD4KPC9zdmc+';">
+          <p>${app.name}</p>
+        `;
+        
+        div.addEventListener('click', () => launchApp(div, app.url));
+        container.appendChild(div);
+      });
+
+      items = document.querySelectorAll('.app-item');
+      if (items.length > 0) {
+        items[currentIndex].classList.add('selected');
+        centerApp();
+      }
+    }
+
+    // --- PS5 Centering Logic ---
+    function centerApp() {
+      if (items.length === 0) return;
+      const container = document.getElementById('app-list');
+      const item = items[currentIndex];
+      
+      // Calculate how far to shift the row to keep the selected item in the exact center
+      const containerWidth = window.innerWidth;
+      const itemOffsetLeft = item.offsetLeft;
+      const itemWidth = item.offsetWidth;
+      
+      const targetTranslate = (containerWidth / 2) - (itemOffsetLeft + (itemWidth / 2));
+      container.style.transform = `translateX(${targetTranslate}px)`;
+    }
+
+    // --- Launch Animation Logic ---
+    function launchApp(element, url) {
+      const imgElement = element.querySelector('img');
+      if (imgElement) {
+        document.body.classList.add('app-transitioning');
+        imgElement.classList.add('animate-to-fullscreen');
+        setTimeout(() => {
+          window.location.href = url;
+        }, 3000); 
+      } else {
+        window.location.href = url;
+      }
+    }
+
+    function launchAppByName(name, url) {
+      const item = Array.from(items).find(el => el.getAttribute('data-name') === name);
+      if (item) {
+        // Find index and update selection before launching
+        const index = Array.from(items).indexOf(item);
+        if (index !== -1) {
+          items[currentIndex].classList.remove('selected');
+          currentIndex = index;
+          items[currentIndex].classList.add('selected');
+          centerApp();
+        }
+        // Delay launch slightly to show selection transition
+        setTimeout(() => launchApp(item, url), 200);
+      } else {
+        window.location.href = url;
+      }
+    }
+
+    // --- Remote Control Navigation ---
+    function updateSelection(newIndex) {
+      if (items.length === 0) return;
+      items[currentIndex].classList.remove('selected');
+      currentIndex = (newIndex + items.length) % items.length;
+      items[currentIndex].classList.add('selected');
+      centerApp();
+    }
+
+    // --- Global Keydown Listener ---
+    let upArrowHoldTimer = null;
+    let isRainbowModeActive = false;
+    let lastLeftArrowPressTime = 0;
+    const doublePressThreshold = 400;
+    let rainbowModeToggleCoolDown = null;
+
+    document.addEventListener('keydown', (e) => {
+      if (document.body.classList.contains('app-transitioning')) {
+        e.preventDefault();
+        return;
+      }
+
+      // Scaling functionality (Using Up/Down arrows)
+      const baseBodyFontSizePx = 16;
+      let currentScaleFactor = parseFloat(document.body.style.fontSize) / baseBodyFontSizePx || 1.0;
+      const minScaleFactor = 0.7;
+      const maxScaleFactor = 1.5;
+      const scaleStep = 0.1;
+
+      if (e.key === 'ArrowUp' || e.keyCode === 38) {
+        currentScaleFactor = Math.min(maxScaleFactor, currentScaleFactor + scaleStep);
+        document.body.style.fontSize = (baseBodyFontSizePx * currentScaleFactor) + 'px';
+        centerApp(); // Re-center on scale change
+        e.preventDefault();
+        return;
+      } else if (e.key === 'ArrowDown' || e.keyCode === 40) {
+        currentScaleFactor = Math.max(minScaleFactor, currentScaleFactor - scaleStep);
+        document.body.style.fontSize = (baseBodyFontSizePx * currentScaleFactor) + 'px';
+        centerApp(); // Re-center on scale change
+        e.preventDefault();
+        return;
+      }
+
+      // PageUp/PageDown also scaling
+      if (e.key === 'PageUp' || e.keyCode === 33) {
+        currentScaleFactor = Math.min(maxScaleFactor, currentScaleFactor + scaleStep);
+        document.body.style.fontSize = (baseBodyFontSizePx * currentScaleFactor) + 'px';
+        centerApp();
+        e.preventDefault();
+        return;
+      } else if (e.key === 'PageDown' || e.keyCode === 34) {
+        currentScaleFactor = Math.max(minScaleFactor, currentScaleFactor - scaleStep);
+        document.body.style.fontSize = (baseBodyFontSizePx * currentScaleFactor) + 'px';
+        centerApp();
+        e.preventDefault();
+        return;
+      }
+
+      // Rainbow Mode Toggle (Double Left Arrow - NOT navigation left, but rapid double tap)
+      // To not conflict with navigation, we check time between presses.
+      if (e.key === 'ArrowLeft') {
+        const currentTime = new Date().getTime();
+        if (currentTime - lastLeftArrowPressTime < doublePressThreshold) {
+          if (rainbowModeToggleCoolDown === null) {
+            isRainbowModeActive = !isRainbowModeActive;
+            document.body.classList.toggle('rainbow-mode', isRainbowModeActive);
+            rainbowModeToggleCoolDown = setTimeout(() => { rainbowModeToggleCoolDown = null; }, doublePressThreshold * 1.5);
+          }
+        }
+        lastLeftArrowPressTime = currentTime;
+      }
+
+      // Grid Navigation (Left/Right only since it's a carousel)
+      switch(e.key) {
+        case 'ArrowRight':
+          updateSelection(currentIndex + 1);
+          e.preventDefault();
+          break;
+        case 'ArrowLeft':
+          updateSelection(currentIndex - 1);
+          e.preventDefault();
+          break;
+        case 'Enter':
+          if (items[currentIndex]) items[currentIndex].click();
+          e.preventDefault();
+          break;
+      }
+
+      // Number Key Mappings
+      if (e.keyCode == 48) launchAppByName('TikTok TV', 'https://tv.tiktok.com/webos');
+      if (e.keyCode == 49) launchAppByName('Media Station X', 'https://msx.benzac.de/lg.html?exit=1');
+      if (e.keyCode == 50) launchAppByName('Lampa', 'http://lampa.mx/');
+      if (e.keyCode == 51) launchAppByName('Wikipedia', 'http://4181361297.am-live.fxmconnect.com/#app');
+      if (e.keyCode == 52) launchAppByName('Ott-Play', 'http://ott-play.com/f/');
+      if (e.keyCode == 53) launchAppByName('DStore VIP', 'http://salita.pluton-host.ru/tv/vip.php');
+      if (e.keyCode == 54) launchAppByName('SS-IPTV', 'https://app.ss-iptv.com/?group=LG&version=r_beta');
+      if (e.keyCode == 55) launchAppByName('Megogo Games', 'https://app.megogo.games');
+      if (e.keyCode == 56) launchAppByName('myTuner Radio', 'https://devices.mytuner.mobi');
+      if (e.keyCode == 57) window.location.href = "https://itsrealm12c.github.io/onlinewebosapplauncher/choosetheversion.html";
+      
+      // Escape / Backspace
+      if (e.keyCode == 27 || e.keyCode == 8) {
+        window.location.href = "https://apps.tvgam.es/tv_games/foxxum_portal/production/portal/index.html#portal";
+      }
+
+      // Color Button Mappings
+      if (typeof VK_BLUE !== 'undefined' && e.keyCode === VK_BLUE) document.location.reload(true);
+      if (typeof VK_RED !== 'undefined' && e.keyCode === VK_RED) launchAppByName('YouTube', 'https://www.youtube.com/tv?env_forceFullAnimation=1&env_enableVoice=1&env_enableWebSpeech=0');
+      if (typeof VK_GREEN !== 'undefined' && e.keyCode === VK_GREEN) launchAppByName('TV Games', 'https://apps.tvgam.es/tv_games/foxxum_portal/production/portal/index.html#portal');
+      if (typeof VK_YELLOW !== 'undefined' && e.keyCode === VK_YELLOW) launchAppByName('Free Games by PlayWorks', 'https://service.play.works/service/apps/portal_vizio/index.html');
+    });
+
+    // --- Clock Update ---
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('clock').textContent = `${h}:${m}`;
+    }
+
+    // --- Initialization ---
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Reset animation classes on page load
+      document.body.classList.remove('app-transitioning');
+      
+      // Auto-detect initial scale
+      const width = window.innerWidth;
+      let initialScale = 1.0;
+      if (width <= 800) initialScale = 0.8;
+      else if (width <= 1200) initialScale = 1.0;
+      else initialScale = 1.2;
+      document.body.style.fontSize = (16 * initialScale) + 'px';
+
+      updateClock();
+      setInterval(updateClock, 10000);
+
+      // Fetch and Render Apps (Will try JSON -> XML -> Fallback Array)
+      apps = await fetchApps();
+      renderApps(apps);
+    });
+
+    // Re-center apps if the window is resized
+    window.addEventListener('resize', centerApp);
+
+    // webOS Key Codes
+    if (typeof VK_0 === 'undefined') VK_0 = 48;
+    if (typeof VK_1 === 'undefined') VK_1 = 49;
+    if (typeof VK_2 === 'undefined') VK_2 = 50;
+    if (typeof VK_3 === 'undefined') VK_3 = 51;
+    if (typeof VK_4 === 'undefined') VK_4 = 52;
+    if (typeof VK_5 === 'undefined') VK_5 = 53;
+    if (typeof VK_6 === 'undefined') VK_6 = 54;
+    if (typeof VK_7 === 'undefined') VK_7 = 55;
+    if (typeof VK_8 === 'undefined') VK_8 = 56;
+    if (typeof VK_9 === 'undefined') VK_9 = 57;
+    if (typeof VK_BACK === 'undefined') VK_BACK = 461;
+    if (typeof VK_BACK_SPACE === 'undefined') VK_BACK_SPACE = 8;
+    if (typeof VK_RED === 'undefined') VK_RED = 403;
+    if (typeof VK_GREEN === 'undefined') VK_GREEN = 404;
+    if (typeof VK_YELLOW === 'undefined') VK_YELLOW = 405;
+    if (typeof VK_BLUE === 'undefined') VK_BLUE = 406;
+    if (typeof VK_REWIND === 'undefined') VK_REWIND = 412;
+    if (typeof VK_STOP === 'undefined') VK_STOP = 413;
+    if (typeof VK_PLAY === 'undefined') VK_PLAY = 415;
+    if (typeof VK_RECORD === 'undefined') VK_RECORD = 416;
+    if (typeof VK_FAST_FWD === 'undefined') VK_FAST_FWD = 417;
+    if (typeof VK_PREV === 'undefined') VK_PREV = 424;
+    if (typeof VK_NEXT === 'undefined') VK_NEXT = 425;
+    if (typeof VK_PAUSE === 'undefined') VK_PAUSE = 19;
+    if (typeof VK_LEFT === 'undefined') VK_LEFT = 37;
+    if (typeof VK_UP === 'undefined') VK_UP = 38;
+    if (typeof VK_RIGHT === 'undefined') VK_RIGHT = 39;
+    if (typeof VK_DOWN === 'undefined') VK_DOWN = 40;
+
+    // Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
