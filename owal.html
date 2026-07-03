@@ -76,7 +76,8 @@
       width: 100vw;
       height: 100vh;
       display: flex;
-      align-items: center;
+      align-items: flex-start; /* Align to top to move UI higher */
+      padding-top: 18vh; /* Push down slightly from the very top */
       justify-content: center;
       overflow: hidden;
     }
@@ -107,10 +108,10 @@
                   opacity 0.45s ease, 
                   filter 0.45s ease;
       
-      /* Unselected state properties */
-      transform: scale(0.8);
-      opacity: 0.4;
-      filter: brightness(0.6) saturate(0.8);
+      /* Unselected state properties - heavily dimmed and small */
+      transform: scale(0.7);
+      opacity: 0.3;
+      filter: brightness(0.5);
     }
 
     .app-item img {
@@ -121,15 +122,15 @@
       background: #1a1a1a;
       box-shadow: 0 8px 20px rgba(0,0,0,0.6);
       border: 2px solid transparent;
-      transition: box-shadow 0.45s ease, border-color 0.45s ease;
+      transition: box-shadow 0.45s ease, border-color 0.45s ease, border-width 0.45s ease;
     }
 
     .app-item p {
       position: absolute;
-      bottom: -3.5em;
-      width: 20em;
+      bottom: -4em; /* Moved down slightly to accommodate larger scaling */
+      width: 25em;
       text-align: center;
-      font-size: 1.2em;
+      font-size: 1.3em;
       font-weight: 500;
       color: var(--text-color);
       opacity: 0;
@@ -139,17 +140,18 @@
       pointer-events: none;
     }
 
-    /* PS5 Focus / Selected State */
+    /* PS5 Focus / Selected State - Very distinct and bright */
     .app-item.selected {
-      transform: scale(1.15); /* Smoothly grows larger */
+      transform: scale(1.2); /* Smoothly grows significantly larger */
       z-index: 10;
       opacity: 1;
-      filter: brightness(1.1) saturate(1.1);
+      filter: brightness(1.2);
     }
 
     .app-item.selected img {
-      border-color: rgba(255,255,255,0.9);
-      box-shadow: 0 0 35px var(--accent-glow), 0 10px 30px rgba(0,0,0,0.9);
+      border-color: rgba(255,255,255,1);
+      border-width: 4px;
+      box-shadow: 0 0 50px 8px var(--accent-glow), 0 15px 35px rgba(0,0,0,0.9);
     }
 
     .app-item.selected p {
