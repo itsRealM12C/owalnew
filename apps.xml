@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<apps>
+    <app>
+        <name>YouTube</name>
+        <icon>youtube.leanback.png</icon>
+        <url>https://www.youtube.com/tv?env_forceFullAnimation=1&amp;env_enableVoice=1&amp;env_enableWebSpeech=0</url>
+        <background>#FF0000</background>
+    </app>
+    <app>
+        <name>YouTube Kids</name>
+        <icon>ytkids.png</icon>
+        <url>https://www.youtube.com/tv/kids</url>
+        <background>#FF0000</background>
+    </app>
+    <app>
+        <name>Twitch</name>
+        <icon>twitch.png</icon>
+        <url>https://webos.tv.twitch.tv/</url>
+        <background>#9146FF</background>
+    </app>
+    <app>
+        <name>TikTok TV</name>
+        <icon>tiktok.png</icon>
+        <url>https://tv.tiktok.com/webos</url>
+        <background>#000000</background>
+    </app>
+    <app>
+        <name>Free Games by PlayWorks</name>
+        <icon>playworks.gif</icon>
+        <url>https://service.play.works/service/apps/portal_vizio/index.html</url>
+        <background>#00E5FF</background>
+    </app>
+    <app>
+        <name>AccuWeather</name>
+        <icon>accuweather.gif</icon>
+        <url>https://lgsmarttvapp.accuweather.com/widget/lgsmarttvapp/webcontent/webos/index.html</url>
+        <background>#FF6600</background>
+    </app>
+    <app>
+        <name>myTuner Radio</name>
+        <icon>radio.png</icon>
+        <url>https://devices.mytuner.mobi/</url>
+        <background>#FF5500</background>
+    </app>
+    <app>
+        <name>TV Games</name>
+        <icon>tvgames.png</icon>
+        <url>https://apps.tvgam.es/tv_games/vizio_portal/production/portal/index.html?env_forceFullAnimation=1</url>
+        <background>#00FF00</background>
+    </app>
+    <app>
+        <name>Couchplay Games</name>
+        <icon>spielecenter.tv.itsmy.png</icon>
+        <url>https://lgapp.itsmy.tv/spielecenter</url>
+        <background>#1DB954</background>
+    </app>
+    <app>
+        <name>Spotify</name>
+        <icon>spotify-beehive.png</icon>
+        <url>https://api-partner.spotify.com/tvapp?platform=webos</url>
+        <background>#1DB954</background>
+    </app>
+    <app>
+        <name>Direct One</name>
+        <icon>direct.png</icon>
+        <url>https://upchustatic.solocoo.tv/webos/12.4.0/main.html</url>
+        <background>#E50914</background>
+    </app>
+    <app>
+        <name>Megogo Games</name>
+        <icon>mgames.png</icon>
+        <url>https://app.megogo.games</url>
+        <background>#FFCC00</background>
+    </app>
+    <app>
+        <name>SWEET.TV</name>
+        <icon>sweet.png</icon>
+        <url>https://tv.sweet.tv</url>
+        <background>#FF69B4</background>
+    </app>
+    <app>
+        <name>MEGOGO</name>
+        <icon>megogo.png</icon>
+        <url>https://lg-app.megogo.net/?lang=EN</url>
+        <background>#FFCC00</background>
+    </app>
+    <app>
+        <name>Awale</name>
+        <icon>awale.png</icon>
+        <url>https://smartgames.tv/vprod/Awale/</url>
+        <background>#8B4513</background>
+    </app>
+    <app>
+        <name>Stremio</name>
+        <icon>stremio.gif</icon>
+        <url>https://tv.strem.io/</url>
+        <background>#8A2BE2</background>
+    </app>
+    <app>
+        <name>Max</name>
+        <icon>max.gif</icon>
+        <url>https://webos.play.max.com</url>
+        <background>#0000FF</background>
+    </app>
+    <app>
+        <name>Web Video Caster</name>
+        <icon>webvideocaster.gif</icon>
+        <url>http://vewd.webvideocaster.com/</url>
+        <background>#FF5722</background>
+    </app>
+    <app>
+        <name>!Free! Games Hub</name>
+        <icon>freegameshub.gif</icon>
+        <url>https://cdn.klebo.io/hub/webos/1.2.0</url>
+        <background>#00FF00</background>
+    </app>
+    <app>
+        <name>SS-IPTV</name>
+        <icon>ss.png</icon>
+        <url>https://app.ss-iptv.com/?group=LG&amp;version=r_beta</url>
+        <background>#00FFFF</background>
+    </app>
+    <app>
+        <name>Media Station X</name>
+        <icon>msx.png</icon>
+        <url>https://msx.benzac.de/lg.html?exit=1</url>
+        <background>#FFFFFF</background>
+    </app>
+    <app>
+        <name>Plex</name>
+        <icon>plex.png</icon>
+        <url>https://app.plex.tv/tv-v5-generic?platform=foxxum</url>
+        <background>#E5A00D</background>
+    </app>
+    <app>
+        <name>SmartOne IPTV</name>
+        <icon>smartoneiptv.gif</icon>
+        <url>https://netcast.smartone-iptv.com/</url>
+        <background>#FF0000</background>
+    </app>
+    <app>
+        <name>Wikipedia</name>
+        <icon>wikipedia.png</icon>
+        <url>http://4181361297.am-live.fxmconnect.com/#app</url>
+        <background>#000000</background>
+    </app>
+    <app>
+        <name>3D Pinball</name>
+        <icon>https://repo.webosbrew.org/apps/icons/com.github.k4zmu2a.space-cadet-pinball.png</icon>
+        <url>https://emupedia.net/emupedia-game-space-cadet-pinball/</url>
+        <background>#0000FF</background>
+    </app>
+    <app>
+        <name>Chocolate Doom Demo</name>
+        <icon>https://repo.webosbrew.org/apps/icons/org.chocolate-doom.demo.png</icon>
+        <url>https://mattiasgustavsson.com/wasm/doom-crt/</url>
+        <background>#8B0000</background>
+    </app>
+    <app>
+        <name>Lampa</name>
+        <icon>lampa.png</icon>
+        <url>http://lampa.mx/</url>
+        <background>#FF4500</background>
+    </app>
+    <app>
+        <name>ForkNewBeta</name>
+        <icon>forknewbeta.png</icon>
+        <url>http://browser.appinfo.su/</url>
+        <background>#2F4F4F</background>
+    </app>
+    <app>
+        <name>Ott-Play</name>
+        <icon>Ottplay.png</icon>
+        <url>http://ott-play.com/f/</url>
+        <background>#1E90FF</background>
+    </app>
+    <app>
+        <name>Ott-Play FOSS</name>
+        <icon>ottplayfoss.png</icon>
+        <url>http://ottp.eu.org/f/</url>
+        <background>#1E90FF</background>
+    </app>
+    <app>
+        <name>DStore 1</name>
+        <icon>dstore.png</icon>
+        <url>http://z91926l2.beget.tech/tv/index.php</url>
+        <background>#FF8C00</background>
+    </app>
+    <app>
+        <name>DStore 2</name>
+        <icon>dstore.png</icon>
+        <url>http://x920083t.beget.tech/tv/indexv.php</url>
+        <background>#FF8C00</background>
+    </app>
+    <app>
+        <name>DStore VIP</name>
+        <icon>dstore.png</icon>
+        <url>http://salita.pluton-host.ru/tv/vip.php</url>
+        <background>#FFD700</background>
+    </app>
+    <app>
+        <name>LG Channels</name>
+        <icon>lgc.png</icon>
+        <url>https://lgchp-app.megogo.net/#init</url>
+        <background>#A52A2A</background>
+    </app>
+</apps>
