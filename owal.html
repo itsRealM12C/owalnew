@@ -24,7 +24,7 @@
       margin: 0;
       padding: 0;
       overflow: hidden; /* Prevent default scrollbars */
-      transition: font-size 0.2s ease;
+      transition: font-size 0.3s ease; /* Smooth scaling for the whole UI */
       user-select: none;
     }
 
@@ -45,7 +45,7 @@
       top: 0;
       left: 0;
       width: 100%;
-      padding: 40px 60px 20px;
+      padding: 2.5em 3.75em 1.25em; /* Using em for scaling */
       box-sizing: border-box;
       display: flex;
       justify-content: space-between;
@@ -85,16 +85,16 @@
       display: flex;
       flex-direction: row;
       align-items: center;
-      gap: 35px;
+      gap: 2.5em; /* Scaled gap between items */
       padding: 0 50vw; /* Ensures first and last items can reach the center */
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth scrolling */
+      transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1); /* Smooth scrolling */
       will-change: transform;
     }
 
     .app-item {
       flex-shrink: 0;
-      width: 200px;
-      height: 200px;
+      width: 12.5em; /* 200px base size (scales with body font-size) */
+      height: 12.5em;
       position: relative;
       display: flex;
       flex-direction: column;
@@ -102,7 +102,15 @@
       justify-content: center;
       cursor: pointer;
       outline: none;
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      /* Smooth transition for size, opacity, and brightness */
+      transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), 
+                  opacity 0.45s ease, 
+                  filter 0.45s ease;
+      
+      /* Unselected state properties */
+      transform: scale(0.8);
+      opacity: 0.4;
+      filter: brightness(0.6) saturate(0.8);
     }
 
     .app-item img {
@@ -111,21 +119,21 @@
       object-fit: cover;
       border-radius: 25%; /* PS5 Squircle shape */
       background: #1a1a1a;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
       border: 2px solid transparent;
-      transition: all 0.3s ease;
+      transition: box-shadow 0.45s ease, border-color 0.45s ease;
     }
 
     .app-item p {
       position: absolute;
-      bottom: -50px;
-      width: 250px;
+      bottom: -3.5em;
+      width: 20em;
       text-align: center;
       font-size: 1.2em;
       font-weight: 500;
       color: var(--text-color);
       opacity: 0;
-      transform: translateY(-10px);
+      transform: translateY(-1em);
       transition: opacity 0.3s ease, transform 0.3s ease;
       text-shadow: 0 0 10px var(--accent-glow);
       pointer-events: none;
@@ -133,13 +141,15 @@
 
     /* PS5 Focus / Selected State */
     .app-item.selected {
-      transform: scale(1.15);
+      transform: scale(1.15); /* Smoothly grows larger */
       z-index: 10;
+      opacity: 1;
+      filter: brightness(1.1) saturate(1.1);
     }
 
     .app-item.selected img {
       border-color: rgba(255,255,255,0.9);
-      box-shadow: 0 0 40px var(--accent-glow), 0 15px 40px rgba(0,0,0,0.9);
+      box-shadow: 0 0 35px var(--accent-glow), 0 10px 30px rgba(0,0,0,0.9);
     }
 
     .app-item.selected p {
@@ -203,7 +213,7 @@
       bottom: 0;
       left: 0;
       width: 100%;
-      padding: 20px 60px;
+      padding: 1.25em 3.75em;
       background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
       font-size: 0.8em;
       color: var(--text-muted);
@@ -214,7 +224,7 @@
     #footer-controls b {
       color: var(--accent);
       font-weight: bold;
-      margin-right: 5px;
+      margin-right: 0.4em;
     }
 
     /* Rainbow mode overrides */
