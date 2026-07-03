@@ -108,10 +108,10 @@
                   opacity 0.45s ease, 
                   filter 0.45s ease;
       
-      /* Unselected state properties - heavily dimmed and small */
-      transform: scale(0.7);
-      opacity: 0.3;
-      filter: brightness(0.5);
+      /* Unselected state properties */
+      transform: scale(0.8);
+      opacity: 0.6;
+      filter: brightness(0.7);
     }
 
     .app-item img {
@@ -271,18 +271,20 @@
 
     function hslToRgb(h, s, l) {
         h /= 360;
-        const a = s * Math.min(l, 1 - l);
-        const f = (n) => {
-            const k = (n + h * 12) % 12;
+        var a = s * Math.min(l, 1 - l);
+        var f = function(n) {
+            var k = (n + h * 12) % 12;
             return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
         };
         return [f(0), f(8), f(4)];
     }
 
     (function applyAccent() {
-        const hue = window.__accentHue;
-        const accent = hslToRgb(hue, 1.0, 0.55);
-        const toCss = (rgb, a) => `rgba(${Math.round(rgb[0]*255)}, ${Math.round(rgb[1]*255)}, ${Math.round(rgb[2]*255)}, ${a})`;
+        var hue = window.__accentHue;
+        var accent = hslToRgb(hue, 1.0, 0.55);
+        var toCss = function(rgb, a) {
+          return 'rgba(' + Math.round(rgb[0]*255) + ', ' + Math.round(rgb[1]*255) + ', ' + Math.round(rgb[2]*255) + ', ' + a + ')';
+        };
         document.documentElement.style.setProperty('--accent', toCss(accent, 1));
         document.documentElement.style.setProperty('--accent-dim', toCss(accent, 0.18));
         document.documentElement.style.setProperty('--accent-glow', toCss(accent, 0.9));
@@ -388,8 +390,8 @@
       }
     `;
 
-    let width = window.innerWidth;
-    let height = window.innerHeight;
+    var width = window.innerWidth;
+    var height = window.innerHeight;
 
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(0, width, 0, height, 1, 3);
@@ -399,23 +401,23 @@
     renderer.setSize(width, height);
     document.body.insertBefore(renderer.domElement, document.body.firstChild);
 
-    let geometry = new THREE.PlaneGeometry(width, height);
+    var geometry = new THREE.PlaneGeometry(width, height);
     geometry.translate(width / 2, height / 2, 0); 
 
     function hslToRgbVec(h, s, l) {
         h /= 360;
-        const a = s * Math.min(l, 1 - l);
-        const f = (n) => {
-            const k = (n + h * 12) % 12;
+        var a = s * Math.min(l, 1 - l);
+        var f = function(n) {
+            var k = (n + h * 12) % 12;
             return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
         };
         return new THREE.Vector3(f(0), f(8), f(4));
     }
 
-    const baseHue = window.__accentHue !== undefined ? window.__accentHue : (170 + Math.random() * 80);
-    const colorA = hslToRgbVec(baseHue, 0.9, 0.35);
-    const colorB = hslToRgbVec((baseHue + 25) % 360, 0.95, 0.62);
-    const colorMode = Math.random() < 0.5 ? 0.0 : 1.0;
+    var baseHue = window.__accentHue !== undefined ? window.__accentHue : (170 + Math.random() * 80);
+    var colorA = hslToRgbVec(baseHue, 0.9, 0.35);
+    var colorB = hslToRgbVec((baseHue + 25) % 360, 0.95, 0.62);
+    var colorMode = Math.random() < 0.5 ? 0.0 : 1.0;
 
     const uniforms = {
       time: { value: 0.0 },
@@ -433,7 +435,7 @@
       side: THREE.DoubleSide
     });
 
-    let mesh = new THREE.Mesh(geometry, material);
+    var mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
 
     const clock = new THREE.Clock();
@@ -444,7 +446,7 @@
     }
     animate();
 
-    window.addEventListener('resize', () => {
+    window.addEventListener('resize', function() {
         width = window.innerWidth;
         height = window.innerHeight;
         
@@ -492,13 +494,18 @@
             
             if (xmlApps.length > 0) {
               console.log('Successfully loaded apps.xml');
-              let appsArray = [];
-              xmlApps.forEach(app => {
+              var appsArray = [];
+              xmlApps.forEach(function(app) {
+                var nameNode = app.querySelector("name");
+                var iconNode = app.querySelector("icon");
+                var urlNode = app.querySelector("url");
+                var bgNode = app.querySelector("background");
+                
                 appsArray.push({
-                  name: app.querySelector("name")?.textContent || "Unknown",
-                  icon: app.querySelector("icon")?.textContent || "",
-                  url: app.querySelector("url")?.textContent || "#",
-                  background: app.querySelector("background")?.textContent || "#000000"
+                  name: nameNode ? nameNode.textContent : "Unknown",
+                  icon: iconNode ? iconNode.textContent : "",
+                  url: urlNode ? urlNode.textContent : "#",
+                  background: bgNode ? bgNode.textContent : "#000000"
                 });
               });
               return appsArray;
@@ -549,27 +556,28 @@
       }
     }
 
-    let apps = [];
-    let items = [];
-    let currentIndex = 0;
+    var apps = [];
+    var items = [];
+    var currentIndex = 0;
 
     function renderApps(data) {
-      const container = document.getElementById('app-list');
+      var container = document.getElementById('app-list');
       container.innerHTML = '';
       
-      data.forEach(app => {
-        const div = document.createElement('div');
+      data.forEach(function(app) {
+        var div = document.createElement('div');
         div.className = 'app-item';
         div.setAttribute('data-url', app.url);
         div.setAttribute('data-name', app.name);
         
         // Using onerror to fallback if icon is missing
-        div.innerHTML = `
-          <img src="${app.icon}" alt="${app.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNjAiIGhlaWdodD0iMTYwIiB2aWV3Qm94PSIwIDAgMTYwIDE2MCI+CiAgPHJlY3Qgd2lkdGg9IjE2MCIgaGVpZ2h0PSIxNjAiIGZpbGw9IiMzMzMiLz4KICA8dGV4dCB4PSI4MCIgeT0iODAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyMCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgYWxpZ25tZW50PSJtaWRkbGUiPkFwcDwvdGV4dD4KPC9zdmc+';">
-          <p>${app.name}</p>
-        `;
+        div.innerHTML = 
+          '<img src="' + app.icon + '" alt="' + app.name + '" onerror="this.src=\'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNjAiIGhlaWdodD0iMTYwIiB2aWV3Qm94PSIwIDAgMTYwIDE2MCI+CiAgPHJlY3Qgd2lkdGg9IjE2MCIgaGVpZ2h0PSIxNjAiIGZpbGw9IiMzMzMiLz4KICA8dGV4dCB4PSI4MCIgeT0iODAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyMCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgYWxpZ25tZW50PSJtaWRkbGUiPkFwcDwvdGV4dD4KPC9zdmc+\';">' +
+          '<p>' + app.name + '</p>';
         
-        div.addEventListener('click', () => launchApp(div, app.url));
+        div.addEventListener('click', function() {
+          launchApp(div, app.url);
+        });
         container.appendChild(div);
       });
 
@@ -583,25 +591,25 @@
     // --- PS5 Centering Logic ---
     function centerApp() {
       if (items.length === 0) return;
-      const container = document.getElementById('app-list');
-      const item = items[currentIndex];
+      var container = document.getElementById('app-list');
+      var item = items[currentIndex];
       
       // Calculate how far to shift the row to keep the selected item in the exact center
-      const containerWidth = window.innerWidth;
-      const itemOffsetLeft = item.offsetLeft;
-      const itemWidth = item.offsetWidth;
+      var containerWidth = window.innerWidth;
+      var itemOffsetLeft = item.offsetLeft;
+      var itemWidth = item.offsetWidth;
       
-      const targetTranslate = (containerWidth / 2) - (itemOffsetLeft + (itemWidth / 2));
-      container.style.transform = `translateX(${targetTranslate}px)`;
+      var targetTranslate = (containerWidth / 2) - (itemOffsetLeft + (itemWidth / 2));
+      container.style.transform = 'translateX(' + targetTranslate + 'px)';
     }
 
     // --- Launch Animation Logic ---
     function launchApp(element, url) {
-      const imgElement = element.querySelector('img');
+      var imgElement = element.querySelector('img');
       if (imgElement) {
         document.body.classList.add('app-transitioning');
         imgElement.classList.add('animate-to-fullscreen');
-        setTimeout(() => {
+        setTimeout(function() {
           window.location.href = url;
         }, 3000); 
       } else {
@@ -610,10 +618,16 @@
     }
 
     function launchAppByName(name, url) {
-      const item = Array.from(items).find(el => el.getAttribute('data-name') === name);
+      var item = null;
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].getAttribute('data-name') === name) {
+          item = items[i];
+          break;
+        }
+      }
+      
       if (item) {
-        // Find index and update selection before launching
-        const index = Array.from(items).indexOf(item);
+        var index = Array.prototype.indexOf.call(items, item);
         if (index !== -1) {
           items[currentIndex].classList.remove('selected');
           currentIndex = index;
@@ -621,7 +635,9 @@
           centerApp();
         }
         // Delay launch slightly to show selection transition
-        setTimeout(() => launchApp(item, url), 200);
+        setTimeout(function() {
+          launchApp(item, url);
+        }, 200);
       } else {
         window.location.href = url;
       }
@@ -637,24 +653,25 @@
     }
 
     // --- Global Keydown Listener ---
-    let upArrowHoldTimer = null;
-    let isRainbowModeActive = false;
-    let lastLeftArrowPressTime = 0;
-    const doublePressThreshold = 400;
-    let rainbowModeToggleCoolDown = null;
+    var upArrowHoldTimer = null;
+    var isRainbowModeActive = false;
+    var lastLeftArrowPressTime = 0;
+    var doublePressThreshold = 400;
+    var rainbowModeToggleCoolDown = null;
 
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', function(e) {
       if (document.body.classList.contains('app-transitioning')) {
         e.preventDefault();
         return;
       }
 
       // Scaling functionality (Using Up/Down arrows)
-      const baseBodyFontSizePx = 16;
-      let currentScaleFactor = parseFloat(document.body.style.fontSize) / baseBodyFontSizePx || 1.0;
-      const minScaleFactor = 0.7;
-      const maxScaleFactor = 1.5;
-      const scaleStep = 0.1;
+      var baseBodyFontSizePx = 16;
+      var currentFontSize = document.body.style.fontSize;
+      var currentScaleFactor = currentFontSize ? parseFloat(currentFontSize) / baseBodyFontSizePx : 1.0;
+      var minScaleFactor = 0.7;
+      var maxScaleFactor = 1.5;
+      var scaleStep = 0.1;
 
       if (e.key === 'ArrowUp' || e.keyCode === 38) {
         currentScaleFactor = Math.min(maxScaleFactor, currentScaleFactor + scaleStep);
@@ -688,12 +705,12 @@
       // Rainbow Mode Toggle (Double Left Arrow - NOT navigation left, but rapid double tap)
       // To not conflict with navigation, we check time between presses.
       if (e.key === 'ArrowLeft') {
-        const currentTime = new Date().getTime();
+        var currentTime = new Date().getTime();
         if (currentTime - lastLeftArrowPressTime < doublePressThreshold) {
           if (rainbowModeToggleCoolDown === null) {
             isRainbowModeActive = !isRainbowModeActive;
             document.body.classList.toggle('rainbow-mode', isRainbowModeActive);
-            rainbowModeToggleCoolDown = setTimeout(() => { rainbowModeToggleCoolDown = null; }, doublePressThreshold * 1.5);
+            rainbowModeToggleCoolDown = setTimeout(function() { rainbowModeToggleCoolDown = null; }, doublePressThreshold * 1.5);
           }
         }
         lastLeftArrowPressTime = currentTime;
@@ -741,20 +758,20 @@
 
     // --- Clock Update ---
     function updateClock() {
-      const now = new Date();
-      const h = String(now.getHours()).padStart(2, '0');
-      const m = String(now.getMinutes()).padStart(2, '0');
-      document.getElementById('clock').textContent = `${h}:${m}`;
+      var now = new Date();
+      var h = String(now.getHours()).padStart(2, '0');
+      var m = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('clock').textContent = h + ':' + m;
     }
 
     // --- Initialization ---
-    document.addEventListener('DOMContentLoaded', async () => {
+    document.addEventListener('DOMContentLoaded', async function() {
       // Reset animation classes on page load
       document.body.classList.remove('app-transitioning');
       
       // Auto-detect initial scale
-      const width = window.innerWidth;
-      let initialScale = 1.0;
+      var width = window.innerWidth;
+      var initialScale = 1.0;
       if (width <= 800) initialScale = 0.8;
       else if (width <= 1200) initialScale = 1.0;
       else initialScale = 1.2;
