@@ -1,0 +1,206 @@
+[
+  {
+    "name": "YouTube",
+    "icon": "youtube.leanback.png",
+    "url": "https://www.youtube.com/tv?env_forceFullAnimation=1&env_enableVoice=1&env_enableWebSpeech=0",
+    "background": "#FF0000"
+  },
+  {
+    "name": "YouTube Kids",
+    "icon": "ytkids.png",
+    "url": "https://www.youtube.com/tv/kids",
+    "background": "#FF0000"
+  },
+  {
+    "name": "Twitch",
+    "icon": "twitch.png",
+    "url": "https://webos.tv.twitch.tv/",
+    "background": "#9146FF"
+  },
+  {
+    "name": "TikTok TV",
+    "icon": "tiktok.png",
+    "url": "https://tv.tiktok.com/webos",
+    "background": "#000000"
+  },
+  {
+    "name": "Free Games by PlayWorks",
+    "icon": "playworks.gif",
+    "url": "https://service.play.works/service/apps/portal_vizio/index.html",
+    "background": "#00E5FF"
+  },
+  {
+    "name": "AccuWeather",
+    "icon": "accuweather.gif",
+    "url": "https://lgsmarttvapp.accuweather.com/widget/lgsmarttvapp/webcontent/webos/index.html",
+    "background": "#FF6600"
+  },
+  {
+    "name": "myTuner Radio",
+    "icon": "radio.png",
+    "url": "https://devices.mytuner.mobi/",
+    "background": "#FF5500"
+  },
+  {
+    "name": "TV Games",
+    "icon": "tvgames.png",
+    "url": "https://apps.tvgam.es/tv_games/vizio_portal/production/portal/index.html?env_forceFullAnimation=1",
+    "background": "#00FF00"
+  },
+  {
+    "name": "Couchplay Games",
+    "icon": "spielecenter.tv.itsmy.png",
+    "url": "https://lgapp.itsmy.tv/spielecenter",
+    "background": "#1DB954"
+  },
+  {
+    "name": "Spotify",
+    "icon": "spotify-beehive.png",
+    "url": "https://api-partner.spotify.com/tvapp?platform=webos",
+    "background": "#1DB954"
+  },
+  {
+    "name": "Direct One",
+    "icon": "direct.png",
+    "url": "https://upchustatic.solocoo.tv/webos/12.4.0/main.html",
+    "background": "#E50914"
+  },
+  {
+    "name": "Megogo Games",
+    "icon": "mgames.png",
+    "url": "https://app.megogo.games",
+    "background": "#FFCC00"
+  },
+  {
+    "name": "SWEET.TV",
+    "icon": "sweet.png",
+    "url": "https://tv.sweet.tv",
+    "background": "#FF69B4"
+  },
+  {
+    "name": "MEGOGO",
+    "icon": "megogo.png",
+    "url": "https://lg-app.megogo.net/?lang=EN",
+    "background": "#FFCC00"
+  },
+  {
+    "name": "Awale",
+    "icon": "awale.png",
+    "url": "https://smartgames.tv/vprod/Awale/",
+    "background": "#8B4513"
+  },
+  {
+    "name": "Stremio",
+    "icon": "stremio.gif",
+    "url": "https://tv.strem.io/",
+    "background": "#8A2BE2"
+  },
+  {
+    "name": "Max",
+    "icon": "max.gif",
+    "url": "https://webos.play.max.com",
+    "background": "#0000FF"
+  },
+  {
+    "name": "Web Video Caster",
+    "icon": "webvideocaster.gif",
+    "url": "http://vewd.webvideocaster.com/",
+    "background": "#FF5722"
+  },
+  {
+    "name": "!Free! Games Hub",
+    "icon": "freegameshub.gif",
+    "url": "https://cdn.klebo.io/hub/webos/1.2.0",
+    "background": "#00FF00"
+  },
+  {
+    "name": "SS-IPTV",
+    "icon": "ss.png",
+    "url": "https://app.ss-iptv.com/?group=LG&version=r_beta",
+    "background": "#00FFFF"
+  },
+  {
+    "name": "Media Station X",
+    "icon": "msx.png",
+    "url": "https://msx.benzac.de/lg.html?exit=1",
+    "background": "#FFFFFF"
+  },
+  {
+    "name": "Plex",
+    "icon": "plex.png",
+    "url": "https://app.plex.tv/tv-v5-generic?platform=foxxum",
+    "background": "#E5A00D"
+  },
+  {
+    "name": "SmartOne IPTV",
+    "icon": "smartoneiptv.gif",
+    "url": "https://netcast.smartone-iptv.com/",
+    "background": "#FF0000"
+  },
+  {
+    "name": "Wikipedia",
+    "icon": "wikipedia.png",
+    "url": "http://4181361297.am-live.fxmconnect.com/#app",
+    "background": "#000000"
+  },
+  {
+    "name": "3D Pinball",
+    "icon": "https://repo.webosbrew.org/apps/icons/com.github.k4zmu2a.space-cadet-pinball.png",
+    "url": "https://emupedia.net/emupedia-game-space-cadet-pinball/",
+    "background": "#0000FF"
+  },
+  {
+    "name": "Chocolate Doom Demo",
+    "icon": "https://repo.webosbrew.org/apps/icons/org.chocolate-doom.demo.png",
+    "url": "https://mattiasgustavsson.com/wasm/doom-crt/",
+    "background": "#8B0000"
+  },
+  {
+    "name": "Lampa",
+    "icon": "lampa.png",
+    "url": "http://lampa.mx/",
+    "background": "#FF4500"
+  },
+  {
+    "name": "ForkNewBeta",
+    "icon": "forknewbeta.png",
+    "url": "http://browser.appinfo.su/",
+    "background": "#2F4F4F"
+  },
+  {
+    "name": "Ott-Play",
+    "icon": "Ottplay.png",
+    "url": "http://ott-play.com/f/",
+    "background": "#1E90FF"
+  },
+  {
+    "name": "Ott-Play FOSS",
+    "icon": "ottplayfoss.png",
+    "url": "http://ottp.eu.org/f/",
+    "background": "#1E90FF"
+  },
+  {
+    "name": "DStore 1",
+    "icon": "dstore.png",
+    "url": "http://z91926l2.beget.tech/tv/index.php",
+    "background": "#FF8C00"
+  },
+  {
+    "name": "DStore 2",
+    "icon": "dstore.png",
+    "url": "http://x920083t.beget.tech/tv/indexv.php",
+    "background": "#FF8C00"
+  },
+  {
+    "name": "DStore VIP",
+    "icon": "dstore.png",
+    "url": "http://salita.pluton-host.ru/tv/vip.php",
+    "background": "#FFD700"
+  },
+  {
+    "name": "LG Channels",
+    "icon": "lgc.png",
+    "url": "https://lgchp-app.megogo.net/#init",
+    "background": "#A52A2A"
+  }
+]
