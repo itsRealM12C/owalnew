@@ -77,7 +77,7 @@
       height: 100vh;
       display: flex;
       align-items: flex-start; /* Align to top to move UI higher */
-      padding-top: 15vh; /* Push down slightly from the very top */
+      padding-top: 20vh; /* Push down from the top */
       overflow: hidden;
     }
 
@@ -86,15 +86,15 @@
       flex-direction: row;
       align-items: center;
       gap: 2.5em; /* Scaled gap between items */
-      /* No padding here anymore, JS handles centering perfectly */
+      /* No padding here, JS handles left-aligning perfectly */
       transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1); /* Smooth scrolling */
       will-change: transform;
     }
 
     .app-item {
       flex-shrink: 0;
-      width: 12.5em; /* 200px base size (scales with body font-size) */
-      height: 12.5em;
+      width: 10em; /* 160px base size (scales with body font-size) */
+      height: 10em;
       position: relative;
       display: flex;
       flex-direction: column;
@@ -102,60 +102,62 @@
       justify-content: center;
       cursor: pointer;
       outline: none;
+      background: #1a1a1a; /* Fallback background if icon is missing */
+      border-radius: 25%; /* PS5 Squircle shape */
+      
       /* Smooth transition for size, opacity, and brightness */
       transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), 
                   opacity 0.45s ease, 
-                  filter 0.45s ease;
+                  filter 0.45s ease,
+                  box-shadow 0.45s ease,
+                  border-color 0.45s ease;
       
       /* Unselected state properties */
-      transform: scale(0.8);
-      opacity: 0.6;
-      filter: brightness(0.7);
+      transform: scale(0.75);
+      opacity: 0.5;
+      filter: brightness(0.6);
+      border: 2px solid transparent;
     }
 
     .app-item img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 25%; /* PS5 Squircle shape */
-      background: #1a1a1a;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-      border: 2px solid transparent;
-      transition: box-shadow 0.45s ease, border-color 0.45s ease, border-width 0.45s ease;
+      border-radius: 25%; /* Match parent squircle */
+      background: transparent; /* Let parent show through if broken */
+      pointer-events: none;
     }
 
     .app-item p {
       position: absolute;
-      bottom: -4em; /* Moved down slightly to accommodate larger scaling */
-      width: 25em;
+      bottom: -3em;
+      width: 20em;
+      left: 50%;
+      transform: translateX(-50%) translateY(-1em); /* Center text under icon */
       text-align: center;
-      font-size: 1.3em;
+      font-size: 1.2em;
       font-weight: 500;
       color: var(--text-color);
       opacity: 0;
-      transform: translateY(-1em);
       transition: opacity 0.3s ease, transform 0.3s ease;
       text-shadow: 0 0 10px var(--accent-glow);
       pointer-events: none;
+      white-space: nowrap; /* Prevent text wrapping */
     }
 
     /* PS5 Focus / Selected State - Very distinct and bright */
     .app-item.selected {
-      transform: scale(1.2); /* Smoothly grows significantly larger */
+      transform: scale(1.1); /* Smoothly grows larger */
       z-index: 10;
       opacity: 1;
       filter: brightness(1.2);
-    }
-
-    .app-item.selected img {
       border-color: rgba(255,255,255,1);
-      border-width: 4px;
-      box-shadow: 0 0 50px 8px var(--accent-glow), 0 15px 35px rgba(0,0,0,0.9);
+      box-shadow: 0 0 40px 8px var(--accent-glow), 0 15px 35px rgba(0,0,0,0.9);
     }
 
     .app-item.selected p {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateX(-50%) translateY(0); /* Slide in */
     }
 
     /* Edge Fade Mask */
@@ -164,7 +166,7 @@
       position: absolute;
       top: 0;
       bottom: 0;
-      width: 15vw;
+      width: 10vw; /* Smaller fade since we are left-aligned */
       z-index: 5;
       pointer-events: none;
     }
@@ -194,7 +196,7 @@
       transform: scale(1); /* Override selected scale during launch */
     }
 
-    body.app-transitioning .app-item img:not(.animate-to-fullscreen),
+    body.app-transitioning .app-item:not(.selected),
     body.app-transitioning .ps-header,
     body.app-transitioning #footer-controls,
     body.app-transitioning .app-viewport::before,
@@ -236,7 +238,7 @@
 
     body.rainbow-mode canvas,
     body.rainbow-mode .ps-header h1,
-    body.rainbow-mode .app-item.selected img,
+    body.rainbow-mode .app-item.selected,
     body.rainbow-mode .app-item.selected p {
       animation: rainbowHue 5s linear infinite;
     }
@@ -569,9 +571,9 @@
         div.setAttribute('data-url', app.url);
         div.setAttribute('data-name', app.name);
         
-        // Using onerror to fallback if icon is missing
+        // Using onerror to hide broken image cleanly, letting parent background show
         div.innerHTML = 
-          '<img src="' + app.icon + '" alt="' + app.name + '" onerror="this.src=\'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNjAiIGhlaWdodD0iMTYwIiB2aWV3Qm94PSIwIDAgMTYwIDE2MCI+CiAgPHJlY3Qgd2lkdGg9IjE2MCIgaGVpZ2h0PSIxNjAiIGZpbGw9IiMzMzMiLz4KICA8dGV4dCB4PSI4MCIgeT0iODAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyMCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgYWxpZ25tZW50PSJtaWRkbGUiPkFwcDwvdGV4dD4KPC9zdmc+\';">' +
+          '<img src="' + app.icon + '" alt="' + app.name + '" onerror="this.style.visibility=\'hidden\';">' +
           '<p>' + app.name + '</p>';
         
         div.addEventListener('click', function() {
@@ -583,23 +585,22 @@
       items = document.querySelectorAll('.app-item');
       if (items.length > 0) {
         items[currentIndex].classList.add('selected');
-        // Wait for DOM to update layout before centering
-        requestAnimationFrame(centerApp);
+        // Wait for DOM to update layout before positioning
+        requestAnimationFrame(positionApp);
       }
     }
 
-    // --- PS5 Centering Logic ---
-    function centerApp() {
+    // --- Left-Aligned Positioning Logic ---
+    function positionApp() {
       if (items.length === 0) return;
       var container = document.getElementById('app-list');
       var item = items[currentIndex];
       
-      // Calculate how far to shift the row to keep the selected item in the exact center
-      var containerWidth = window.innerWidth;
+      // Calculate how far to shift the row to keep the selected item on the LEFT side
+      var leftOffset = window.innerWidth * 0.08; // 8% from the left edge
       var itemOffsetLeft = item.offsetLeft;
-      var itemWidth = item.offsetWidth;
       
-      var targetTranslate = (containerWidth / 2) - (itemOffsetLeft + (itemWidth / 2));
+      var targetTranslate = leftOffset - itemOffsetLeft;
       container.style.transform = 'translateX(' + targetTranslate + 'px)';
     }
 
@@ -632,7 +633,7 @@
           items[currentIndex].classList.remove('selected');
           currentIndex = index;
           items[currentIndex].classList.add('selected');
-          centerApp();
+          positionApp();
         }
         // Delay launch slightly to show selection transition
         setTimeout(function() {
@@ -649,7 +650,7 @@
       items[currentIndex].classList.remove('selected');
       currentIndex = (newIndex + items.length) % items.length;
       items[currentIndex].classList.add('selected');
-      centerApp();
+      positionApp();
     }
 
     // --- Global Keydown Listener ---
@@ -676,13 +677,13 @@
       if (e.key === 'ArrowUp' || e.keyCode === 38) {
         currentScaleFactor = Math.min(maxScaleFactor, currentScaleFactor + scaleStep);
         document.body.style.fontSize = (baseBodyFontSizePx * currentScaleFactor) + 'px';
-        requestAnimationFrame(centerApp); // Re-center on scale change after layout updates
+        requestAnimationFrame(positionApp); // Re-position on scale change
         e.preventDefault();
         return;
       } else if (e.key === 'ArrowDown' || e.keyCode === 40) {
         currentScaleFactor = Math.max(minScaleFactor, currentScaleFactor - scaleStep);
         document.body.style.fontSize = (baseBodyFontSizePx * currentScaleFactor) + 'px';
-        requestAnimationFrame(centerApp); // Re-center on scale change after layout updates
+        requestAnimationFrame(positionApp); // Re-position on scale change
         e.preventDefault();
         return;
       }
@@ -691,19 +692,18 @@
       if (e.key === 'PageUp' || e.keyCode === 33) {
         currentScaleFactor = Math.min(maxScaleFactor, currentScaleFactor + scaleStep);
         document.body.style.fontSize = (baseBodyFontSizePx * currentScaleFactor) + 'px';
-        requestAnimationFrame(centerApp);
+        requestAnimationFrame(positionApp);
         e.preventDefault();
         return;
       } else if (e.key === 'PageDown' || e.keyCode === 34) {
         currentScaleFactor = Math.max(minScaleFactor, currentScaleFactor - scaleStep);
         document.body.style.fontSize = (baseBodyFontSizePx * currentScaleFactor) + 'px';
-        requestAnimationFrame(centerApp);
+        requestAnimationFrame(positionApp);
         e.preventDefault();
         return;
       }
 
-      // Rainbow Mode Toggle (Double Left Arrow - NOT navigation left, but rapid double tap)
-      // To not conflict with navigation, we check time between presses.
+      // Rainbow Mode Toggle (Double Left Arrow)
       if (e.key === 'ArrowLeft') {
         var currentTime = new Date().getTime();
         if (currentTime - lastLeftArrowPressTime < doublePressThreshold) {
@@ -792,8 +792,8 @@
       renderApps(apps);
     });
 
-    // Re-center apps if the window is resized
-    window.addEventListener('resize', centerApp);
+    // Re-position apps if the window is resized
+    window.addEventListener('resize', positionApp);
 
     // webOS Key Codes
     if (typeof VK_0 === 'undefined') VK_0 = 48;
